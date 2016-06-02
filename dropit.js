@@ -1,5 +1,5 @@
 /*
- * Dropit v1.1.0
+ * Dropit v1.2.0
  * http://dev7studios.com/dropit
  *
  * Copyright 2012, Dev7studios
@@ -25,39 +25,64 @@
                     .find('>'+ settings.triggerParentEl +':has('+ settings.submenuEl +')').addClass('dropit-trigger')
                     .find(settings.submenuEl).addClass('dropit-submenu').hide();
 
-                    // Open on click
-                    $el.off(settings.action).on(settings.action, settings.triggerParentEl +':has('+ settings.submenuEl +') > '+ settings.triggerEl +'', function(){
-                        // Close click menu's if clicked again
-                        if(settings.action == 'click' && $(this).parents(settings.triggerParentEl).hasClass('dropit-open')){
+                    if(settings.action == 'hoverintent') {
+                        $el.hoverIntent({
+                            over: function() {
+                                // Hide open menus
+                                settings.beforeHide.call(this);
+                                $('.dropit-open').removeClass('dropit-open').find('.dropit-submenu').hide();
+                                settings.afterHide.call(this);
+
+                                // Open this menu
+                                settings.beforeShow.call(this);
+                                $(this).addClass('dropit-open').find(settings.submenuEl).show();
+                                settings.afterShow.call(this);
+
+                                return false;
+                            },
+                            out: function() {
+                                settings.beforeHide.call(this);
+                                $(this).removeClass('dropit-open').find(settings.submenuEl).hide();
+                                settings.afterHide.call(this);
+                            },
+                            selector: '.dropit-trigger',
+                            timeout: 500
+                        });
+                    } else {
+                        // Open on click
+                        $el.off(settings.action).on(settings.action, settings.triggerParentEl + ':has(' + settings.submenuEl + ') > ' + settings.triggerEl + '', function () {
+                            // Close click menu's if clicked again
+                            if (settings.action == 'click' && $(this).parents(settings.triggerParentEl).hasClass('dropit-open')) {
+                                settings.beforeHide.call(this);
+                                $(this).parents(settings.triggerParentEl).removeClass('dropit-open').find(settings.submenuEl).hide();
+                                settings.afterHide.call(this);
+                                return false;
+                            }
+
+                            // Hide open menus
                             settings.beforeHide.call(this);
-                            $(this).parents(settings.triggerParentEl).removeClass('dropit-open').find(settings.submenuEl).hide();
+                            $('.dropit-open').removeClass('dropit-open').find('.dropit-submenu').hide();
                             settings.afterHide.call(this);
+
+                            // Open this menu
+                            settings.beforeShow.call(this);
+                            $(this).parents(settings.triggerParentEl).addClass('dropit-open').find(settings.submenuEl).show();
+                            settings.afterShow.call(this);
+
                             return false;
-                        }
-
-                        // Hide open menus
-                        settings.beforeHide.call(this);
-                        $('.dropit-open').removeClass('dropit-open').find('.dropit-submenu').hide();
-                        settings.afterHide.call(this);
-
-                        // Open this menu
-                        settings.beforeShow.call(this);
-                        $(this).parents(settings.triggerParentEl).addClass('dropit-open').find(settings.submenuEl).show();
-                        settings.afterShow.call(this);
-
-                        return false;
-                    });
+                        });
+                    }
 
                     // Close if outside click
-                    $(document).on('click', function(){
+                    $(document).on('click', function () {
                         settings.beforeHide.call(this);
                         $('.dropit-open').removeClass('dropit-open').find('.dropit-submenu').hide();
                         settings.afterHide.call(this);
                     });
 
                     // If hover
-                    if(settings.action == 'mouseenter'){
-                        $el.on('mouseleave', '.dropit-open', function(){
+                    if (settings.action == 'mouseenter') {
+                        $el.on('mouseleave', '.dropit-open', function () {
                             settings.beforeHide.call(this);
                             $(this).removeClass('dropit-open').find(settings.submenuEl).hide();
                             settings.afterHide.call(this);
@@ -81,7 +106,7 @@
     };
 
     $.fn.dropit.defaults = {
-        action: 'click', // The open action for the trigger
+        action: 'click', // The open action for the trigger, enhanced hoverIntent
         submenuEl: 'ul', // The submenu element
         triggerEl: 'a', // The trigger element
         triggerParentEl: 'li', // The trigger parent element
